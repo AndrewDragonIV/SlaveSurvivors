@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <title>Slave Survivors</title>
+    <link rel="icon" href="data:,">
+    <!-- Добавляем скрипт Telegram WebApp -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.1.79/dist/rexvirtualjoystickplugin.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            /* Добавляем стили для Telegram WebApp */
+            color: var(--tg-theme-text-color, #000000);
+            background: var(--tg-theme-bg-color, #ffffff);
+        }
+        #game {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        #error-message {
+            display: none;
+            color: red;
+            text-align: center;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="game"></div>
+    <div id="error-message">
+        This game can only be played in Telegram Mini Apps
+    </div>
+    <script>
+        // Инициализация Telegram WebApp
+        const tg = window.Telegram.WebApp;
+        
+        // Проверяем, запущено ли приложение в Telegram
+        if (tg.initDataUnsafe.user) {
+            // Раскрываем на весь экран
+            tg.expand();
+            
+            // Включаем подтверждение закрытия
+            tg.enableClosingConfirmation();
+            
+            // Загружаем игру
+            document.getElementById('game').style.display = 'flex';
+            document.getElementById('error-message').style.display = 'none';
+        } else {
+            // Показываем сообщение об ошибке
+            document.getElementById('game').style.display = 'none';
+            document.getElementById('error-message').style.display = 'block';
+        }
+
+        // Обработчик изменения размера viewport
+        tg.onEvent('viewportChanged', () => {
+            // Если у вас есть доступ к экземпляру игры, можно обновить размер
+            if (window.game) {
+                window.game.scale.resize(window.innerWidth, window.innerHeight);
+            }
+        });
+    </script>
+    <script type="module" src="src/index.js"></script>
+</body>
+</html>
