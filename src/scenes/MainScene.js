@@ -9,6 +9,12 @@ class MainScene extends Phaser.Scene {
     }
 
     init() {
+        // Проверяем, открыто ли в Telegram
+        if (window.Telegram && window.Telegram.WebApp) {
+        this.tg = window.Telegram.WebApp;
+        // Расширяем на весь экран
+        this.tg.expand();
+    }
         // Проверяем, запущено ли через команду
         if (this.tg.initDataUnsafe?.start_param === 'game') {
             console.log('Game started via /game command');
