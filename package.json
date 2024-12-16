@@ -1,17 +1,16 @@
+
 {
   "name": "slave-survivors",
   "version": "1.0.0",
+  "description": "Slave Survivors Game",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon --watch . -e js,html,css --exec \"http-server -c-1 --port 8081\"",
-    "start": "parcel src/index.html --open",
-    "build": "parcel build src/index.html"
+    "dev": "nodemon --watch . --ext js,html,css --exec \"http-server -c-1 --port 8081\"",
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html --public-url ./",
+    "clean": "rm -rf dist .parcel-cache"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
-    "node-telegram-bot-api": "^0.66.0",
     "phaser": "^3.87.0"
   },
   "devDependencies": {
@@ -19,5 +18,20 @@
     "nodemon": "^3.1.9",
     "parcel": "^2.13.2"
   },
-  "description": "��#\u0000 \u0000S\u0000l\u0000a\u0000v\u0000e\u0000S\u0000u\u0000r\u0000v\u0000i\u0000v\u0000o\u0000r\u0000s\u0000\r\u0000 \u0000"
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 0.5%",
+    "not dead"
+  ],
+  "keywords": [
+    "game",
+    "phaser",
+    "html5",
+    "javascript"
+  ],
+  "author": "",
+  "license": "ISC"
 }

@@ -1,3 +1,4 @@
+
 // index.js
 import MainScene from './scenes/MainScene.js';
 
@@ -40,6 +41,16 @@ const config = {
    }
 };
 
+// Проверяем, существует ли элемент с id 'game'
+if (!document.getElementById('game')) {
+   console.error("Элемент с id 'game' не найден. Убедитесь, что ваш HTML содержит `<div id='game'></div>`.");
+}
+
+// Проверяем, инициализирована ли библиотека джойстиков
+if (!window.rexvirtualjoystickplugin) {
+   console.warn('rexVirtualJoystickPlugin не загружен или неправильно инициализирован.');
+}
+
 // Класс игры с поддержкой Telegram
 class Game extends Phaser.Game {
    constructor(config) {
@@ -53,11 +64,13 @@ class Game extends Phaser.Game {
        
        // Инициализация завершена
        tg.ready();
+       console.log('Инициализация игры завершена.');
    }
 
    handleViewportChange() {
        const { width, height } = getGameDimensions();
        this.scale.resize(width, height);
+       console.log(`Viewport изменен: ${width}x${height}`);
    }
 
    // Метод для отправки данных в Telegram при необходимости
@@ -69,8 +82,9 @@ class Game extends Phaser.Game {
 // Создаем игру только если запущено в Telegram
 if (tg.initDataUnsafe.user) {
    const game = new Game(config);
+   console.log('Игра создана.');
 } else {
-   console.warn('This game should be run in Telegram Mini Apps');
+   console.warn('Эта игра должна быть запущена в Telegram Mini Apps');
 }
 
 // Обработка изменения размера окна
@@ -78,6 +92,7 @@ window.addEventListener('resize', () => {
    if (window.game) {
        const { width, height } = getGameDimensions();
        window.game.scale.resize(width, height);
+       console.log('Окно изменено, игра перерисована.');
    }
 });
 

@@ -3,81 +3,116 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Slave Survivors - Telegram Mini App Game">
+    <meta name="theme-color" content="#000000">
+    
     <title>Slave Survivors</title>
+    
     <link rel="icon" href="data:,">
-    <!-- Добавляем скрипт Telegram WebApp -->
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.1.79/dist/rexvirtualjoystickplugin.min.js"></script>
+    
+    <!-- External Scripts -->
+    <script defer src="https://telegram.org/js/telegram-web-app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.1.79/dist/rexvirtualjoystickplugin.min.js"></script>
+    
     <style>
-        body {
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #000000;
+        }
+
+        * {
             margin: 0;
             padding: 0;
-            background-color: #000000;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            overflow: hidden;
-            /* Добавляем стили для Telegram WebApp */
-            color: var(--tg-theme-text-color, #000000);
-            background: var(--tg-theme-bg-color, #ffffff);
+            box-sizing: border-box;
         }
-        #game {
+
+        html, body {
             width: 100%;
             height: 100%;
+        }
+
+        body {
+            background-color: #000000;
+            color: var(--tg-theme-text-color);
+            background: var(--tg-theme-bg-color);
+            overflow: hidden;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
         }
+
         canvas {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            display: block;
         }
-        #error-message {
+
+        .error-message {
             display: none;
-            color: red;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #ff0000;
             text-align: center;
             padding: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 8px;
+            font-size: 16px;
         }
     </style>
 </head>
 <body>
-    <div id="game"></div>
-    <div id="error-message">
+    <div id="game-container"></div>
+    <div class="error-message" id="error-message">
         This game can only be played in Telegram Mini Apps
     </div>
-    <script>
-        // Инициализация Telegram WebApp
-        const tg = window.Telegram.WebApp;
-        
-        // Проверяем, запущено ли приложение в Telegram
-        if (tg.initDataUnsafe.user) {
-            // Раскрываем на весь экран
-            tg.expand();
-            
-            // Включаем подтверждение закрытия
-            tg.enableClosingConfirmation();
-            
-            // Загружаем игру
-            document.getElementById('game').style.display = 'flex';
-            document.getElementById('error-message').style.display = 'none';
-        } else {
-            // Показываем сообщение об ошибке
-            document.getElementById('game').style.display = 'none';
-            document.getElementById('error-message').style.display = 'block';
-        }
 
-        // Обработчик изменения размера viewport
-        tg.onEvent('viewportChanged', () => {
-            // Если у вас есть доступ к экземпляру игры, можно обновить размер
-            if (window.game) {
-                window.game.scale.resize(window.innerWidth, window.innerHeight);
+    <script>
+        (function() {
+            const tg = window.Telegram?.WebApp;
+            const gameContainer = document.getElementById('game-container');
+            const errorMessage = document.getElementById('error-message');
+
+            function initializeTelegramApp() {
+                if (!tg) {
+                    showError();
+                    return;
+                }
+
+                tg.expand();
+                tg.enableClosingConfirmation();
+                
+                tg.onEvent('viewportChanged', handleViewportChange);
+                
+                gameContainer.style.display = 'flex';
+                errorMessage.style.display = 'none';
             }
-        });
+
+            function showError() {
+                gameContainer.style.display = 'none';
+                errorMessage.style.display = 'block';
+            }
+
+            function handleViewportChange() {
+                if (window.game?.scale) {
+                    window.game.scale.resize(window.innerWidth, window.innerHeight);
+                }
+            }
+
+            // Initialize when DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', initializeTelegramApp);
+        })();
     </script>
+    
     <script type="module" src="src/index.js"></script>
 </body>
 </html>

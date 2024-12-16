@@ -2,23 +2,22 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     constructor(scene, x, y) {
         super(scene, x, y, 'player');
         
+        this.initializePlayer(scene);
+        this.createHealthBar();
+        this.createParticles(x, y);
+        this.setupControls();
+    }
+
+    initializePlayer(scene) {
         this.scene = scene;
         scene.add.existing(this);
         scene.physics.add.existing(this);
         
-        // Базовые настройки игрока
-        this.setScale(0.5);
-        this.setCollideWorldBounds(true);
-        this.setBounce(0.1);
-        this.setDepth(1);
+        this.setScale(0.5)
+            .setCollideWorldBounds(true)
+            .setBounce(0.1)
+            .setDepth(1);
 
-        // Настройки HP бара
-        this.hpBackground = scene.add.rectangle(0, 0, 50, 6, 0x000000);
-        this.hpBar = scene.add.rectangle(0, 0, 50, 6, 0xff0000);
-        this.hpBackground.setDepth(9999);
-        this.hpBar.setDepth(9999);
-
-        // Характеристики игрока
         this.stats = {
             maxHealth: 100,
             currentHealth: 100,
@@ -28,11 +27,23 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             level: 1,
             experienceToNextLevel: 100
         };
+    }
 
-        // Частицы движения
-        this.moveEmitter = scene.add.particles('particle').createEmitter({
-            x: x,
-            y: y,
+    createHealthBar() {
+        const BAR_DEPTH = 9999;
+        const BAR_WIDTH = 50;
+        const BAR_HEIGHT = 6;
+
+        this.hpBackground = this.scene.add.rectangle(0, 0, BAR_WIDTH, BAR_HEIGHT, 0x000000);
+        this.hpBar = this.scene.add.rectangle(0, 0, BAR_WIDTH, BAR_HEIGHT, 0xff0000);
+        
+        [this.hpBackground, this.hpBar].forEach(bar => bar.setDepth(BAR_DEPTH));
+    }
+
+    createParticles(x, y) {
+        this.moveEmitter = this.scene.add.particles('particle').createEmitter({
+            x,
+            y,
             speed: { min: -20, max: 20 },
             angle: { min: 0, max: 360 },
             scale: { start: 0.1, end: 0 },
@@ -41,47 +52,32 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             quantity: 1,
             on: false
         });
+    }
 
-        // Управление
-        this.cursors = scene.input.keyboard.createCursorKeys();
+    setupControls() {
+        this.cursors = this.scene.input.keyboard.createCursorKeys();
     }
 
     handleMovement() {
-        // Горизонтальное движение
-        if (this.cursors.left.isDown) {
-            this.setVelocityX(-this.stats.moveSpeed);
-            this.moveEmitter.on = true;
-        } else if (this.cursors.right.isDown) {
-            this.setVelocityX(this.stats.moveSpeed);
-            this.moveEmitter.on = true;
-        } else {
-            this.setVelocityX(0);
-            this.moveEmitter.on = false;
-        }
+        const velocity = { x: 0, y: 0 };
+        
+        if (this.cursors.left.isDown) velocity.x = -this.stats.moveSpeed;
+        else if (this.cursors.right.isDown) velocity.x = this.stats.moveSpeed;
+        
+        if (this.cursors.up.isDown) velocity.y = -this.stats.moveSpeed;
+        else if (this.cursors.down.isDown) velocity.y = this.stats.moveSpeed;
 
-        // Вертикальное движение
-        if (this.cursors.up.isDown) {
-            this.setVelocityY(-this.stats.moveSpeed);
-            this.moveEmitter.on = true;
-        } else if (this.cursors.down.isDown) {
-            this.setVelocityY(this.stats.moveSpeed);
-            this.moveEmitter.on = true;
-        } else {
-            this.setVelocityY(0);
-        }
+        this.setVelocity(velocity.x, velocity.y);
+        this.moveEmitter.on = velocity.x !== 0 || velocity.y !== 0;
 
-        // Нормализация диагонального движения
-        if (this.body.velocity.x !== 0 && this.body.velocity.y !== 0) {
+        if (velocity.x !== 0 && velocity.y !== 0) {
             this.body.velocity.normalize().scale(this.stats.moveSpeed);
         }
     }
 
     takeDamage(amount) {
         this.stats.currentHealth = Math.max(0, this.stats.currentHealth - amount);
-        
-        if (this.stats.currentHealth <= 0) {
-            this.die();
-        }
+        if (this.stats.currentHealth <= 0) this.die();
     }
 
     gainExperience(amount) {
@@ -96,15 +92,19 @@ class Player extends Phaser.Physics.Arcade.Sprite {
         this.stats.experience -= this.stats.experienceToNextLevel;
         this.stats.experienceToNextLevel *= 1.2;
         
-        // Увеличение характеристик
+        this.updateStatsOnLevelUp();
+        this.createLevelUpEffect();
+    }
+
+    updateStatsOnLevelUp() {
         this.stats.maxHealth *= 1.1;
         this.stats.currentHealth = this.stats.maxHealth;
         this.stats.damage *= 1.1;
         this.stats.moveSpeed *= 1.05;
+    }
 
-        // Эффект левел-апа
-        const levelUpEffect = this.scene.add.particles('particle');
-        levelUpEffect.createEmitter({
+    createLevelUpEffect() {
+        this.scene.add.particles('particle').createEmitter({
             x: this.x,
             y: this.y,
             speed: { min: -200, max: 200 },
@@ -117,8 +117,13 @@ class Player extends Phaser.Physics.Arcade.Sprite {
     }
 
     die() {
-        // Эффект смерти
-        const deathEmitter = this.scene.add.particles('particle').createEmitter({
+        this.createDeathEffect();
+        this.cleanup();
+        this.scene.events.emit('playerDeath');
+    }
+
+    createDeathEffect() {
+        this.scene.add.particles('particle').createEmitter({
             x: this.x,
             y: this.y,
             speed: { min: -100, max: 100 },
@@ -126,34 +131,32 @@ class Player extends Phaser.Physics.Arcade.Sprite {
             scale: { start: 0.2, end: 0 },
             blendMode: 'ADD',
             lifespan: 800,
-            quantity: 30
-        });
-
-        // Отключаем все
-        this.moveEmitter.on = false;
-        this.hpBackground.destroy();
-        this.hpBar.destroy();
-        this.destroy();
-        
-        // Событие смерти
-        this.scene.events.emit('playerDeath');
+            quantity: 30});
+        }
+    
+        cleanup() {
+            this.moveEmitter.on = false;
+            this.hpBackground.destroy();
+            this.hpBar.destroy();
+            this.destroy();
+        }
+    
+        updateHealthBar() {
+            const healthBarY = this.y - 40;
+            const healthRatio = this.stats.currentHealth / this.stats.maxHealth;
+    
+            this.hpBackground.setPosition(this.x, healthBarY);
+            this.hpBar.setPosition(this.x, healthBarY)
+                .setWidth(50 * healthRatio);
+        }
+    
+        update() {
+            if (!this.active) return;
+    
+            this.handleMovement();
+            this.updateHealthBar();
+            this.moveEmitter.setPosition(this.x, this.y);
+        }
     }
-
-    update() {
-        if (!this.active) return;
-
-        this.handleMovement();
-        
-        // Обновляем HP бар
-        this.hpBackground.x = this.x;
-        this.hpBackground.y = this.y - 40;
-        this.hpBar.x = this.x;
-        this.hpBar.y = this.y - 40;
-        this.hpBar.width = 50 * (this.stats.currentHealth / this.stats.maxHealth);
-
-        // Обновляем частицы
-        this.moveEmitter.setPosition(this.x, this.y);
-    }
-}
-
-export default Player;
+    
+    export default Player;
