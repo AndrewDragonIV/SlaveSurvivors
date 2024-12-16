@@ -1,4 +1,4 @@
-
+import { Logger } from '../utils/Logger.js';
 import Player from '../entities/Player.js';
 
 class MainScene extends Phaser.Scene {
@@ -6,93 +6,164 @@ class MainScene extends Phaser.Scene {
         super('MainScene');
         this.targetPoint = null;
         this.tg = window.Telegram.WebApp;
+        Logger.log('MainScene', 'Constructor initialized');
     }
 
     init() {
-        // Проверяем, открыто ли в Telegram
-        if (window.Telegram && window.Telegram.WebApp) {
-        this.tg = window.Telegram.WebApp;
-        // Расширяем на весь экран
-        this.tg.expand();
-    }
-        // Проверяем, запущено ли через команду
-        if (this.tg.initDataUnsafe?.start_param === 'game') {
-            console.log('Game started via /game command');
+        try {
+            if (window.Telegram && window.Telegram.WebApp) {
+                this.tg = window.Telegram.WebApp;
+                this.tg.expand();
+                Logger.log('MainScene', 'Telegram WebApp initialized');
+            }
+
+            if (this.tg.initDataUnsafe?.start_param === 'game') {
+                Logger.log('MainScene', 'Started via /game command');
+            }
+        } catch (error) {
+            Logger.log('MainScene', Initialization error: ${error.message}, 'error');
         }
     }
 
     preload() {
+        Logger.log('MainScene', 'Starting assets preload');
+        
+        this.load.on('progress', (value) => {
+            Logger.log('MainScene', Loading progress: ${Math.round(value * 100)}%);
+        });
+
+        this.load.on('complete', () => {
+            Logger.log('MainScene', 'Assets loading completed');
+        });
+
         this.load.on('loaderror', (file) => {
-            console.error('Error loading asset:', file.src);
+            Logger.log('MainScene', Failed to load asset: ${file.src}, 'error');
         });
     
-        this.load.image('player', 'assets/slavik.png');
-        this.load.image('particle', 'assets/particle.png');
-        this.load.image('background', 'assets/background.png');
+        try {
+            this.load.image('player', 'assets/slavik.png');
+            this.load.image('particle', 'assets/particle.png');
+            this.load.image('background', 'assets/background.png');
+            Logger.log('MainScene', 'Started loading game assets');
+        } catch (error) {
+            Logger.log('MainScene', Error loading assets: ${error.message}, 'error');
+        }
     }
 
     create() {
-        // Сразу создаем все игровые элементы без ожидания
-        this.background = this.add.tileSprite(0, 0, 600, 600, 'background');
-        this.background.setOrigin(0, 0);
-        this.background.setDepth(-1);
+        try {
+            Logger.log('MainScene', 'Starting scene creation');
 
-        this.createBorders();
-        
-        this.physics.world.setBounds(0, 0, 600, 600);
-        
-        this.player = new Player(
-            this,
-            this.cameras.main.centerX,
-            this.cameras.main.centerY
-        );
+            // Создаем фон
+            this.background = this.add.tileSprite(0, 0, 600, 600, 'background');
+            this.background.setOrigin(0, 0);
+            this.background.setDepth(-1);
+            Logger.log('MainScene', 'Background created');
 
-        this.cameras.main.startFollow(this.player);
+            // Создаем границы
+            this.createBorders();
+            
+            // Устанавливаем границы мира
+            this.physics.world.setBounds(0, 0, 600, 600);
+            Logger.log('MainScene', 'World bounds set');
+            
+            // Создаем игрока
+            this.player = new Player(
+                this,
+                this.cameras.main.centerX,
+                this.cameras.main.centerY
+            );
+            Logger.log('MainScene', Player created at (${this.cameras.main.centerX}, ${this.cameras.main.centerY}));
 
-        // Настраиваем обработчики ввода
-        this.setupInputHandlers();
+            // Настраиваем камеру
+            this.cameras.main.startFollow(this.player);
+            Logger.log('MainScene', 'Camera following player');
+
+            // Настраиваем обработчики ввода
+            this.setupInputHandlers();
+            Logger.log('MainScene', 'Input handlers setup completed');
+
+        } catch (error) {
+            Logger.log('MainScene', Error in create method: ${error.message}, 'error');
+        }
     }
 
     setupInputHandlers() {
-        this.input.on('pointerdown', (pointer) => {
-            this.targetPoint = {
-                x: pointer.x + this.cameras.main.scrollX,
-                y: pointer.y + this.cameras.main.scrollY
-            };
-        });
-
-        this.input.on('pointermove', (pointer) => {
-            if (pointer.isDown) {
+        try {
+            this.input.on('pointerdown', (pointer) => {
                 this.targetPoint = {
                     x: pointer.x + this.cameras.main.scrollX,
                     y: pointer.y + this.cameras.main.scrollY
                 };
-            }
-        });
-        
-        this.input.on('pointerup', () => {
-            this.targetPoint = null;
-            this.player.setVelocity(0, 0);
-        });
+                Logger.log('MainScene', Pointer down at (${this.targetPoint.x}, ${this.targetPoint.y});
+            });
+
+            this.input.on('pointermove', (pointer) => {
+                if (pointer.isDown) {
+                    this.targetPoint = {
+                        x: pointer.x + this.cameras.main.scrollX,
+                        y: pointer.y + this.cameras.main.scrollY
+                    };
+                    Logger.log('MainScene', `Player moving to (${this.targetPoint.x}, ${this.targetPoint.y})`);
+                }
+            });
+            
+            this.input.on('pointerup', () => {
+                this.targetPoint = null;
+                this.player.setVelocity(0, 0);
+                Logger.log('MainScene', 'Player movement stopped');
+            });
+
+            Logger.log('MainScene', 'Input handlers setup completed');
+        } catch (error) {
+            Logger.log('MainScene', Error setting up input handlers: ${error.message}, 'error');
+        }
     }
 
     createBorders() {
-        // Ваш существующий код createBorders без изменений
+        try {
+            // Здесь ваш код создания границ
+            Logger.log('MainScene', 'Borders created successfully');
+        } catch (error) {
+            Logger.log('MainScene', Error creating borders: ${error.message}, 'error');
+        }
     }
 
     moveToPoint(point) {
-        // Ваш существующий код moveToPoint без изменений
+        try {
+            const angle = Phaser.Math.Angle.Between(
+                this.player.x,
+                this.player.y,
+                point.x,
+                point.y
+            );
+
+            const velocity = 200;
+            this.player.setVelocity(
+                Math.cos(angle) * velocity,
+                Math.sin(angle) * velocity
+            );
+
+            Logger.log('MainScene', Moving player to (${Math.round(point.x)}, ${Math.round(point.y)}));
+        } catch (error) {
+            Logger.log('MainScene', Error moving to point: ${error.message}, 'error');
+        }
     }
 
     update() {
-        if (this.player) {
-            this.player.update();
-            
-            if (this.targetPoint) {
-                this.moveToPoint(this.targetPoint);
+        try {
+            if (this.player) {
+                this.player.update();
+                
+                if (this.targetPoint) {
+                    this.moveToPoint(this.targetPoint);
+                }
             }
+        } catch (error) {
+            Logger.log('MainScene', Error in update loop: ${error.message}, 'error');
         }
     }
 }
 
 export default MainScene;
+
