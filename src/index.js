@@ -1,4 +1,3 @@
-
 // index.js
 import MainScene from './scenes/MainScene.js';
 
@@ -33,11 +32,11 @@ const config = {
         autoCenter: Phaser.Scale.CENTER_BOTH
     },
     plugins: {
-        global: [{
+        global: [ {
             key: 'rexVirtualJoystick',
             plugin: window.rexvirtualjoystickplugin,
             start: true
-        }]
+        } ]
     }
 };
 
@@ -52,11 +51,6 @@ class Game extends Phaser.Game {
         // Подписываемся на события Telegram
         tg.onEvent('viewportChanged', this.handleViewportChange.bind(this));
         
-        // Обработчик выхода из игры
-        tg.onEvent('back_button_pressed', () => {
-            tg.close();
-        });
-
         // Инициализация завершена
         tg.ready();
     }
@@ -91,3 +85,4 @@ window.addEventListener('resize', () => {
 document.addEventListener('touchmove', (e) => {
     e.preventDefault();
 }, { passive: false });
+
