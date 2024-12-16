@@ -1,8 +1,10 @@
 
-const config = {
+import MainScene from "./scenes/MainScene.js";
+
+export const config = {
     type: Phaser.AUTO,
-    width: 1280,  // фиксированная ширина
-    height: 720,  // фиксированная высота
+    width: 1280,
+    height: 720,
     physics: {
         default: 'arcade',
         arcade: {
@@ -11,7 +13,7 @@ const config = {
     },
     scene: MainScene,
     scale: {
-        mode: Phaser.Scale.FIT,  // автоматическое масштабирование
-        autoCenter: Phaser.Scale.CENTER_BOTH  // центрирование игры
+        mode: Phaser.Scale.FIT,
+        autoCenter: Phaser.Scale.CENTER_BOTH
     }
 };
