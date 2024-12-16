@@ -4,59 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Slave Survivors - Telegram Mini App Game">
-    <meta name="theme-color" content="#000000">
-    
     <title>Slave Survivors</title>
     
-    <link rel="icon" href="data:,">
-    
-    <!-- External Scripts -->
+    <!-- Важно: скрипт Telegram должен загружаться первым и без defer -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/phaser3-rex-plugins@1.1.79/dist/rexvirtualjoystickplugin.min.js"></script>
     
     <style>
-        * {
+        body {
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-        }
-
-        html, body {
-            width: 100%;
-            height: 100%;
-        }
-
-        body {
             background: #000000;
-            overflow: hidden;
         }
-
         #game-container {
             width: 100vw;
             height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
         }
     </style>
 </head>
 <body>
     <div id="game-container"></div>
-
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.enableClosingConfirmation();
+        window.Telegram.WebApp.expand();
     </script>
-    
     <script type="module" src="src/index.js"></script>
 </body>
 </html>
